@@ -1,0 +1,69 @@
+int numBoids=10;
+float neighbourhoodDistance=50;
+PVector[] position=new PVector[numBoids];
+float[] iDirection=new float[numBoids];
+float[] curDirection=new float[numBoids];
+boolean[] isBoidColliding=new boolean[numBoids];
+boid[] boids=new boid[numBoids];
+
+float[][] distanceMatrix=new float[numBoids][numBoids];
+
+void setup(){
+  size(1000,1000);
+  background(255);
+  for(int i=0;i<numBoids;i++){
+    position[i]=new PVector(i*width/numBoids,i*height/numBoids);
+    //position[0]=new PVector(0,0.5*height);
+    //position[1]=new PVector(width,0.5*height);
+    iDirection[i]=i*2*PI/numBoids;
+    curDirection[i]=iDirection[i];
+    boids[i]=new boid(position[i],iDirection[i]);
+    isBoidColliding[i]=false;
+  }
+  
+};
+
+  void draw(){
+  background(255);  
+  for(int i=0;i<numBoids;i++){
+    for(int j=i+1;j<numBoids;j++){
+      
+      distanceMatrix[i][j]=distance(boids[i].getPosition(),boids[j].getPosition());
+      
+      boids[i].isColliding(boids[j]);
+      if(boids[i].isColliding(boids[j])){
+            if(!isBoidColliding[i])
+                isBoidColliding[i]=true;
+               
+            if(!isBoidColliding[j])
+                isBoidColliding[j]=true;
+               
+              float tempDir=0.5*(boids[i].getDirection()+boids[j].getDirection());
+              //curDirection[i]=boids[j].getDirection();
+              //curDirection[j]=boids[i].getDirection();
+              curDirection[i]=tempDir;
+              curDirection[j]=tempDir;
+
+      }  
+    }
+  }
+  for(int i=0;i<numBoids;i++){
+    boids[i].setDirection(curDirection[i]);
+    boids[i].move();
+    if(isBoidColliding[i]){
+      //boids[i].setFillColor(color(255,0,0));    
+      isBoidColliding[i]=false;
+    }
+    else{
+      //boids[i].setFillColor(color(0,0,0));    
+    }
+    boids[i].show();
+  }
+ };
+
+float vectorDirection(PVector p1,PVector p2){
+  return atan2(p1.y-p2.y,p1.x-p2.x);
+}
+float distance(PVector p1,PVector p2){
+  return sqrt(pow(p1.y-p2.y,2)+pow(p1.x-p2.x,2));
+}
