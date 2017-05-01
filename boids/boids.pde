@@ -1,6 +1,6 @@
 //TODO
 /*
-  Avoid collision
+  change the boid direction contribution ratio from equal to increased importance to collision avoidance with closeness
 */
 
 int numBoids=10;
@@ -10,8 +10,10 @@ boid[] boids=new boid[numBoids];
 
 float[][] distanceMatrix=new float[numBoids][numBoids];
 short[][] neighbourhoodMatrix=new short[numBoids][numBoids];
+
 float[] boidNeighbourDir=new float[numBoids];
 float[] boidCollisionAvoidanceDir=new float[numBoids];
+float[] boidCOGDir=new float[numBoids];
 
 void setup(){
   size(500,500);
@@ -45,22 +47,37 @@ void setup(){
     }
   }
   
+  for(int boidIndex=0;boidIndex<numBoids;boidIndex++){
+    boidCollisionAvoidanceDir[boidIndex]=boids[boidIndex].getDirection();
+    boidCOGDir[boidIndex]=boids[boidIndex].getDirection();
+  }
+  
+  
   //direction based on the neighbours
   for(int i=0;i<numBoids;i++){
     float avgDirOfNeighbours=0;
     int numNeighbours=0;
-    for(int ii=0;ii<numBoids;ii++){
+    
+    PVector boidCOG=new PVector(0,0);
+    for(int ii=i;ii<numBoids;ii++){
       avgDirOfNeighbours+=boids[ii].getDirection()*neighbourhoodMatrix[i][ii];
+
+      boidCOG.x+=boids[ii].getPosition().x*neighbourhoodMatrix[i][ii];
+      boidCOG.y+=boids[ii].getPosition().y*neighbourhoodMatrix[i][ii];
+
       numNeighbours+=neighbourhoodMatrix[i][ii];
     }
     
     avgDirOfNeighbours/=numNeighbours;
     boidNeighbourDir[i]=avgDirOfNeighbours;
+
+    boidCOG.x/=numNeighbours;
+    boidCOG.y/=numNeighbours;
+    if(boidCOG.y!=boids[i].getPosition().y && boidCOG.x!=boids[i].getPosition().x){
+      boidCOGDir[i]=atan2(boidCOG.y-boids[i].getPosition().y,boidCOG.x-boids[i].getPosition().x);
+    }
   }
   
-  for(int boidIndex=0;boidIndex<numBoids;boidIndex++){
-    boidCollisionAvoidanceDir[boidIndex]=boids[boidIndex].getDirection();
-  }
   
   //direction to avoid collision
   for(int i=0;i<numBoids;i++){
@@ -74,10 +91,10 @@ void setup(){
       }
     }
   }
-  
+    
   
   for(int i=0;i<numBoids;i++){
-    boids[i].setDirection(0.5*(boidNeighbourDir[i]+boidCollisionAvoidanceDir[i]));
+    boids[i].setDirection(0.2*boidNeighbourDir[i]+0.6*boidCollisionAvoidanceDir[i]+0.2*boidCOGDir[i]);
     boids[i].move();
     boids[i].show();
   }

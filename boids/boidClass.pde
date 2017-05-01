@@ -77,7 +77,7 @@ public
     //  b.setFillColor(color(0,0,0));
     //}
     
-    if(distBetweenBoids < 50){
+    if(distBetweenBoids < 20){
       return true;
     }
     else{
