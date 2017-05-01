@@ -4,29 +4,21 @@
 */
 
 int numBoids=10;
-float neighbourhoodDistance=20;
-PVector[] position=new PVector[numBoids];
-float[] iDirection=new float[numBoids];
-float[] curDirection=new float[numBoids];
-boolean[] isBoidColliding=new boolean[numBoids];
+float neighbourhoodRadius=100;
+//boolean[] isBoidColliding=new boolean[numBoids];
 boid[] boids=new boid[numBoids];
 
 float[][] distanceMatrix=new float[numBoids][numBoids];
 short[][] neighbourhoodMatrix=new short[numBoids][numBoids];
-float[] flockDirection=new float[numBoids];
-float[] collisionAvoidanceDirection=new float[numBoids];
+float[] boidNeighbourDir=new float[numBoids];
+float[] boidCollisionAvoidanceDir=new float[numBoids];
 
 void setup(){
   size(500,500);
   background(255);
   for(int i=0;i<numBoids;i++){
-    position[i]=new PVector(i*width/numBoids,i*height/numBoids);
-    //position[0]=new PVector(0,0.5*height);
-    //position[1]=new PVector(width,0.5*height);
-    iDirection[i]=i*2*PI/numBoids;
-    curDirection[i]=iDirection[i];
-    boids[i]=new boid(position[i],iDirection[i]);
-    isBoidColliding[i]=false;
+    boids[i]=new boid(new PVector(i*width/numBoids,i*height/numBoids),i*2*PI/numBoids);
+//    isBoidColliding[i]=false;
   }
   
 };
@@ -42,7 +34,7 @@ void setup(){
       }
       else{
         distanceMatrix[i][j]=distance(boids[i].getPosition(),boids[j].getPosition());
-        if(distanceMatrix[i][j]<neighbourhoodDistance){
+        if(distanceMatrix[i][j]<neighbourhoodRadius){
           neighbourhoodMatrix[i][j]=1;
         }
         else{
@@ -55,31 +47,38 @@ void setup(){
   
   //direction based on the neighbours
   for(int i=0;i<numBoids;i++){
-    float dir=0;
-    for(int ii=0;ii<numBoids;ii++){
-      dir+=boids[ii].getDirection()*neighbourhoodMatrix[i][ii];
-    }
-    
+    float avgDirOfNeighbours=0;
     int numNeighbours=0;
     for(int ii=0;ii<numBoids;ii++){
+      avgDirOfNeighbours+=boids[ii].getDirection()*neighbourhoodMatrix[i][ii];
       numNeighbours+=neighbourhoodMatrix[i][ii];
     }
-    dir/=numNeighbours;
-    flockDirection[i]=dir;
+    
+    avgDirOfNeighbours/=numNeighbours;
+    boidNeighbourDir[i]=avgDirOfNeighbours;
+  }
+  
+  for(int boidIndex=0;boidIndex<numBoids;boidIndex++){
+    boidCollisionAvoidanceDir[boidIndex]=boids[boidIndex].getDirection();
   }
   
   //direction to avoid collision
+  for(int i=0;i<numBoids;i++){
+    for(int ii=i+1;ii<numBoids;ii++){
+      if(boids[i].isColliding(boids[ii])){
+        
+        float dirBoid1TowardsBoid2=atan2(boids[ii].getPosition().y-boids[i].getPosition().y,boids[ii].getPosition().x-boids[i].getPosition().x);
+
+        boidCollisionAvoidanceDir[i]=0.5*(boidCollisionAvoidanceDir[i]+dirBoid1TowardsBoid2+PI);
+        boidCollisionAvoidanceDir[ii]=0.5*(boidCollisionAvoidanceDir[ii]+dirBoid1TowardsBoid2);
+      }
+    }
+  }
+  
   
   for(int i=0;i<numBoids;i++){
-    boids[i].setDirection(flockDirection[i]);
+    boids[i].setDirection(0.5*(boidNeighbourDir[i]+boidCollisionAvoidanceDir[i]));
     boids[i].move();
-    if(isBoidColliding[i]){
-      //boids[i].setFillColor(color(255,0,0));    
-      isBoidColliding[i]=false;
-    }
-    else{
-      //boids[i].setFillColor(color(0,0,0));    
-    }
     boids[i].show();
   }
  };

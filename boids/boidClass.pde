@@ -84,12 +84,6 @@ public
       return false;
     }
     
-    
-    //if(abs(position.x-b.position.x) < 0.5*(getHLength()+b.getHLength() + 50) &&
-    //  abs(position.y-b.position.y) < 0.5*(getVLength() + b.getVLength()) + 50){
-    //  return true;
-    //}
-    
   }
   void setFillColor(color c){
     boidColor=c;
