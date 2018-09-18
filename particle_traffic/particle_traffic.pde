@@ -1,24 +1,28 @@
+// Single particle motion
+// unconnected multiparticle motion
+// unconnected multiparticle traffic
+// connected multiparticle traffic
 int NROWS=3;int NCOLS=10;
 float SPACE_ROW=30,SPACE_COL=30;
 
-particle[][] traffic=new particle[NCOLS][NROWS];
+//particle[][] traffic=new particle[NCOLS][NROWS];
+multiparticle trafficsim;
+int systemClock=0;
 void setup(){
-  size(500,500);
+  size(500,500);frameRate(10);
+  
+  randomSeed(0);
+  int pauseRIndex=int(random(NROWS));
+  int pauseCIndex=int(random(NCOLS));
 
-  for(int rIndex=0;rIndex<NROWS;++rIndex){
-    for(int cIndex=0;cIndex<NCOLS;++cIndex){
-      traffic[cIndex][rIndex]=new particle(new PVector(20+SPACE_COL*cIndex,20+SPACE_ROW*rIndex));
-    }
-  }
+  trafficsim=new multiparticle(new PVector(width,height));
 }
 
 void draw(){
+  systemClock+=1;
   background(255);
-
-  for(int rIndex=0;rIndex<NROWS;++rIndex){
-    for(int cIndex=0;cIndex<NCOLS;++cIndex){
-      traffic[cIndex][rIndex].show();
-      traffic[cIndex][rIndex].move(new PVector(width,height));
-    }
-  }
+  println(systemClock);
+  
+  trafficsim.show();
+  
 }
