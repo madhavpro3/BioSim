@@ -38,7 +38,12 @@ class particle{
   }
   
   void show(){
-    fill(c);
+    if(pausetime>0){
+      fill(color(150,150,0));
+    }
+    else{
+      fill(c);
+    }
     noStroke();
     ellipse(pos.x,pos.y,diameter,diameter);
   }
