@@ -11,7 +11,7 @@ void setup(){
 }
 
 void draw(){
-  frameRate(2);
+  frameRate(5);
   systemClock+=1;
   background(255);
   trafficsim.show(systemClock);  
